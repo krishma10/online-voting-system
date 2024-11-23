@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voting App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      background-color: #f4f7f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      background-color: white;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 16px;
+      width: 100%;
+    }
+
+    .btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+      width: 80%;
+      max-width: 400px;
+    }
+
+    .modal-content h2 {
+      margin: 0 0 10px;
+    }
+
+    p {
+      margin: 10px 0;
+    }
+
+    #loginError, #registrationError {
+      color: red;
+    }
+
+    .results {
+      margin-top: 20px;
+      font-size: 16px;
+      text-align: left;
+    }
+
+    .back-btn {
+      background-color: #28a745;
+      margin-top: 10px;
+    }
+
+    .back-btn:hover {
+      background-color: #218838;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    button {
+  width: 100%;
+  padding: 12px 25px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button + button {
+  margin-top: 2px; /* Adds a 2px space between buttons */
+}
+
+  </style>
+</head>
+<body>
+  <div id="registrationPage" class="container">
+    <h2>Register</h2>
+    <input type="text" id="registerUsername" placeholder="Enter username" />
+    <input type="password" id="registerPassword" placeholder="Enter password" />
+    <button class="btn" onclick="register()">Register</button>
+    <p id="registrationError"></p>
+  </div>
+
+  <div id="loginPage" class="container" style="display: none;">
+    <h2>Login</h2>
+    <input type="text" id="loginUsername" placeholder="Enter username" />
+    <input type="password" id="loginPassword" placeholder="Enter password" />
+    <button class="btn" onclick="login()">Login</button>
+    <p id="loginError"></p>
+    <button class="btn back-btn" onclick="showRegistrationPage()">Back to Registration</button>
+  </div>
+
+  <div id="homePage" class="container" style="display: none;">
+    <h2>Welcome to Voting App</h2>
+    <p>Candidate 1: John</p>
+    <p>Candidate 2: Alice</p>
+    <p>Candidate 3: Mark</p>
+    <button id="voteNowButton" class="btn" onclick="showVotingPage()">Vote Now</button>
+    <div id="results" class="results"></div>
+    <button id="backToLoginButton" class="btn back-btn" onclick="showLoginPage()" style="display: none;">Back to Login</button>
+  </div>
+
+  <div id="votingPage" class="container" style="display: none;">
+    <h2>Vote for Your Candidate</h2>
+    <button class="btn" onclick="vote('John')">Vote for John</button>
+    <button class="btn" onclick="vote('Alice')">Vote for Alice</button>
+    <button class="btn" onclick="vote('Mark')">Vote for Mark</button>
+  </div>
+
+  <div id="successModal" class="modal">
+    <div class="modal-content">
+      <h2 id="successMessage"></h2>
+      <button class="btn" onclick="closeModal()">OK</button>
+    </div>
+  </div>
+
+  <script>
+    let hasVoted = false;
+    const votes = { John: 0, Alice: 0, Mark: 0 };
+
+    function register() {
+      const username = document.getElementById('registerUsername').value;
+      const password = document.getElementById('registerPassword').value;
+
+      if (!username || !password) {
+        document.getElementById('registrationError').textContent = "Both fields are required!";
+        return;
+      }
+
+      localStorage.setItem(username, password);
+      showSuccessModal("Registration Successful! Please login.");
+      showLoginPage();
+    }
+
+    function login() {
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const storedPassword = localStorage.getItem(username);
+
+      if (storedPassword === password) {
+        showSuccessModal("Login Successful!");
+        showHomePage();
+      } else {
+        document.getElementById('loginError').textContent = "Invalid username or password!";
+      }
+    }
+
+    function showSuccessModal(message) {
+      document.getElementById('successMessage').textContent = message;
+      document.getElementById('successModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('successModal').style.display = 'none';
+    }
+
+    function showRegistrationPage() {
+      document.getElementById('registrationPage').style.display = 'block';
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('homePage').style.display = 'none';
+      document.getElementById('votingPage').style.display = 'none';
+    }
+
+    function showLoginPage() {
+      document.getElementById('registrationPage').style.display = 'none';
+      document.getElementById('loginPage').style.display = 'block';
+      document.getElementById('homePage').style.display = 'none';
+      document.getElementById('votingPage').style.display = 'none';
+    }
+
+    function showHomePage() {
+      document.getElementById('registrationPage').style.display = 'none';
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('homePage').style.display = 'block';
+      document.getElementById('votingPage').style.display = 'none';
+      document.getElementById('backToLoginButton').style.display = 'inline-block';
+    }
+
+    function showVotingPage() {
+      if (hasVoted) return;
+      document.getElementById('registrationPage').style.display = 'none';
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('homePage').style.display = 'none';
+      document.getElementById('votingPage').style.display = 'block';
+    }
+
+    function vote(candidate) {
+      if (hasVoted) return;
+
+      votes[candidate]++;
+      hasVoted = true;
+      showSuccessModal(`Thanks for voting for ${candidate}!`);
+      showHomePage();
+
+      // Disable the vote button and show results
+      document.getElementById('voteNowButton').disabled = true;
+      document.getElementById('results').innerHTML = `Results:<br>
+        John: ${votes.John} votes<br>
+        Alice: ${votes.Alice} votes<br>
+        Mark: ${votes.Mark} votes`;
+    }
+
+    // Start with the registration page
+    showRegistrationPage();
+  </script>
+</body>
+</html>
